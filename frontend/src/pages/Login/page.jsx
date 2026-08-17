@@ -26,12 +26,12 @@ const Login = () => {
                         withCredentials: true
                     }
                 );
-                
+
                 if (response.data.success) {
                     dispatch(authActions.login());
                     toast.success(response.data.message || "Logged in successfully!");
+                    // Redirect to the user's dashboard only after a successful login
                     redirect("/profile");
-                    // Optional: Redirect user or clear form inputs here
                 } else {
                     // Handles cases where HTTP status is 200 but success is false
                     toast.error(response.data.message || "Log-in failed");

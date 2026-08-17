@@ -32,6 +32,11 @@ const EditBlog = () => {
     fetchBlogs();
    }, []);
 
+   //remove the deleted blog from local state so the UI updates instantly
+   const handleBlogDeleted = (deletedId) => {
+        setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog._id !== deletedId));
+   }
+
     return (
         <div className="container my-5">
 
@@ -42,7 +47,7 @@ const EditBlog = () => {
                 Manage Blogs
             </h2>
             {loading && <h4 className="text-success">Loading Blogs . . .</h4>}
-            <BlogTable blogs={blogs} />
+            <BlogTable blogs={blogs} onBlogDeleted={handleBlogDeleted} />
 
         </div>
     );

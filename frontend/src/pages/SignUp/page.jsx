@@ -23,11 +23,10 @@ const SignUp = () => {
                 { withCredentials: true }
                 );
 
-                redirect("/login");
-
                 if (response.data.success) {
                     toast.success(response.data.message || "Signed up successfully!");
-                    // Optional: Redirect user or clear form inputs here
+                    // Redirect to the login page only after a successful sign-up
+                    redirect("/login");
                 } else {
                     // Handles cases where HTTP status is 200 but success is false
                     toast.error(response.data.message || "Sign-up failed");
