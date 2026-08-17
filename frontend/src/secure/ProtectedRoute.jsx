@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const ProtectedRoute = ({ children }) => {
+
     const { isLoggedIn, loading } = useSelector((state) => state.auth);
 
     useEffect(() => {
@@ -12,22 +13,20 @@ const ProtectedRoute = ({ children }) => {
         }
     }, [loading, isLoggedIn]);
 
-    // 1. Show loading spinner until Redux finishes checking auth status
+    // Wait until authentication has been checked
     if (loading) {
         return (
-            <div className="text-center mt-5 py-5">
-                <div className="spinner-border text-primary mb-2" role="status"></div>
+            <div className="text-center mt-5">
                 <h5>Checking authentication...</h5>
             </div>
         );
-    }
+    } 
 
-    // 2. Redirect to login if loading is false and user is not logged in
+    // Redirect only after loading is complete
     if (!isLoggedIn) {
         return <Navigate to="/login" replace />;
     }
 
-    // 3. Render protected child components
     return children;
 };
 

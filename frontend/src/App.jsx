@@ -36,24 +36,18 @@ function App() {
 
   useEffect(()=>{
     const checkCookie = async()=>{
-      try {
-        const response = await axios.get(`${backendLink}/api/user/cookie`, 
-          {
-            withCredentials: true
-          }
-        );
-        //console.log(response.data.message)
-        if(response.data.message === true){
-          dispatch(authActions.login());
+      const response = await axios.get(`${backendLink}/api/user/cookie`, 
+        {
+          withCredentials: true
         }
-      } catch (error) {
-        console.error("Cookie check failed:", error);
-      } finally {
-        dispatch(authActions.setLoading(false));
+      );
+      //console.log(response.data.message)
+      if(response.data.message === true){
+        dispatch(authActions.login());
       }
     }
     checkCookie();
-  }, [backendLink, dispatch]);
+  }, [backendLink]);
 
   return (
     <div>
