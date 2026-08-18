@@ -1,8 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { authActions } from "../../store/auth.js";
 
 
 const AdminLogin = () => {
@@ -11,6 +12,8 @@ const AdminLogin = () => {
     const [userPassword, setPassword] = useState("");
     const backendLink = useSelector((state)=>state.prod.link);
     const redirect = useNavigate();
+    const dispatch = useDispatch();
+
 
     const handleLogin = async(e)=>{
         e.preventDefault();
@@ -18,12 +21,21 @@ const AdminLogin = () => {
         {
             const userData = { userEmail, userPassword }
             const response = await axios.post(`${backendLink}/api/admin/admin-login`, userData, {withCredentials: true});
-            redirect("/admin-dashboard");
-            toast.success(response.data.message);
+
+            if(response.data.success)
+            {
+                dispatch(authActions.login());
+                toast.success(response.data.message || "Admin logged in successfully!");
+                redirect("/admin-dashboard");
+            } else {
+                dispatch(authActions.logout());
+                toast.error(response.data.message || "Admin login failed");
+            }
         }
         catch(error)
         {
-            toast.error(error.response.data.message);
+            dispatch(authActions.logout());
+            toast.error(error.response?.data?.message || "Something went wrong");
         }
     }
 

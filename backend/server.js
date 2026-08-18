@@ -33,6 +33,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes)
 //3.blogs
 app.use("/api/blog", blogRoutes);
+
  
 const MYPORT = process.env.PORT;
 

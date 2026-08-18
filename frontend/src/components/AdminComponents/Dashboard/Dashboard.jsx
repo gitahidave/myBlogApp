@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import axios from "axios";
 import {
   FaBlog,
   FaUsers,
@@ -6,6 +9,8 @@ import {
 } from "react-icons/fa";
 
 const Dashboard = () => {
+  const [profileData, setProfileData] = useState(null);
+  const backendLink = useSelector((state) => state.prod.link);
   const stats = [
     {
       title: "Blogs",
@@ -33,6 +38,22 @@ const Dashboard = () => {
     },
   ];
 
+  useEffect(()=>{
+    const fetchAdminData = async()=>{
+      try
+      {
+        const response = await axios.get(`${backendLink}/api/admin/admin-data`, { withCredentials: true });
+        setProfileData(response.data.data);
+        console.log(response.data.data);
+      }
+      catch(error)
+      {
+        console.log(error.response.data);
+      }
+    }
+    fetchAdminData();
+  }, [backendLink]);
+
   return (
     <div>
       <div className="mb-4">
@@ -41,7 +62,7 @@ const Dashboard = () => {
         </h2>
 
         <p className="text-muted">
-          Welcome back, Victor 
+          Welcome back, {profileData?.userName || "Admin"}! Here is an overview of the platform's performance and user engagement.
         </p>
       </div>
       <div className="row g-4">

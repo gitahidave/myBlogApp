@@ -88,3 +88,46 @@ export const loginAdmin = async(req, res)=>{
         });
     }
 }
+
+export const adminData = async(req, res)=>{
+    try
+    {
+        const token = req.cookies.myBlogCookie;
+        if(!token)
+        {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorize Access!"
+            });
+        }
+
+        //verify token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+
+        //get user data
+        const userData = await User.findById(userId).select("-userPassword");
+        if(!userData)
+        {
+            return res.status(404).json({
+                success: false,
+                message: "User Not Found!"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User Data Fetched Successfully",
+            data: userData
+        });
+
+    }
+    catch(error)
+    {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Something Went wrong While Fetching User Data!"
+        });
+    }
+}
