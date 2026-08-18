@@ -12,7 +12,7 @@ const app = express();
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://your-frontend.vercel.app"  // Your Vercel frontend URL
+        "https://my-blog-app-nu-three.vercel.app"
     ],
     credentials: true
 }));
