@@ -1,5 +1,5 @@
 import express from "express";
-import { blogDetails, createBlog, fetchBlogs, recentBlogs } from "../controllers/blog.controller.js";
+import { blogDetails, createBlog, fetchBlogs, recentBlogs, updateBlog } from "../controllers/blog.controller.js";
 import authMiddleware from "../middleware/auth.middleware.js";
 import upload from "../middleware/images.middleware.js";
 import { createCategory, fetchBlogByCategory, fetchCategories } from "../controllers/category.controller.js";
@@ -12,6 +12,14 @@ router.post("/create-blog",
     authMiddleware.authorizeRole("admin"),
     upload.single("image"),
     createBlog);
+
+//update blog
+router.put("/update-blog/:id",
+    authMiddleware.verifyToken,
+    authMiddleware.authorizeRole("admin"),
+    upload.single("image"),
+    updateBlog
+);
 
 //create category
 router.post("/create-category", 

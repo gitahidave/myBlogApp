@@ -63,11 +63,12 @@ export const loginAdmin = async(req, res)=>{
         );
 
         //set cookie
+        const isProduction = process.env.NODE_ENV === "production";
         res.cookie("myBlogCookie", token, {
             httpOnly: true,
             maxAge: 2 * 24 * 60 * 60 * 1000,
-            secure: true,
-            sameSite: "None",
+            secure: isProduction,
+            sameSite: isProduction ? "None" : "Lax",
             path: "/"
         });
 

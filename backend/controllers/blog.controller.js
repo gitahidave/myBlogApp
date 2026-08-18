@@ -38,9 +38,10 @@ export const createBlog = async(req, res)=>{
     }
     catch(error)
     {
+        console.log("Create Blog Error:", error);
         return res.status(500).json({
             success: false,
-            message: "Something went wrong"
+            message: error.message || "Something went wrong"
         });
     }
 }
@@ -95,6 +96,14 @@ export const blogDetails = async(req, res)=>{
 
         const blog = await Blog.findById(id);
 
+        if(!blog)
+        {
+            return res.status(404).json({
+                success: false,
+                message: "Blog not found"
+            });
+        }
+
         res.status(200).json({
             success: true,
             message: blog,
@@ -107,5 +116,43 @@ export const blogDetails = async(req, res)=>{
             success: false,
             message: "Something went wrong"
         }); 
+    }
+}
+
+export const updateBlog = async(req, res)=>{
+    try
+    {
+        const { id } = req.params;
+        const { blogTitle, blogDescription, blogContent, blogCategory } = req.body;
+
+        const blog = await Blog.findById(id);
+        if(!blog)
+        {
+            return res.status(404).json({
+                success: false,
+                message: "Blog not found"
+            });
+        }
+
+        if(blogTitle) blog.blogTitle = blogTitle;
+        if(blogDescription) blog.blogDescription = blogDescription;
+        if(blogContent) blog.blogContent = blogContent;
+        if(blogCategory) blog.blogCategory = blogCategory;
+        if(req.file) blog.blogImage = req.file.path;
+
+        await blog.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Blog Updated Successfully!"
+        });
+    }
+    catch(error)
+    {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Something went wrong"
+        });
     }
 }

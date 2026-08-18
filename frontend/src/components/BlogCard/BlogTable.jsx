@@ -27,7 +27,8 @@ const BlogTable = ({ blogs = [] }) => {
                                         { blog.blogDescription }
                                     </td>
                                     <td>
-                                        <Link className="btn btn-primary btn-sm me-2">
+                                        <Link className="btn btn-primary btn-sm me-2"
+                                        to={`/admin-dashboard/update-blog/${blog._id}`}>
                                             Edit
                                         </Link>
 

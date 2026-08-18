@@ -41,7 +41,9 @@ const AddBlog = () => {
     catch(error)
     {
       setLoading(false);
-      toast.error(error.response.data.message)
+      const message = error.response?.data?.message || error.message || "Unable to create blog";
+      toast.error(message);
+      console.log("Create blog error:", error.response?.data || error.message);
     }
     finally{
       setTitle("");
