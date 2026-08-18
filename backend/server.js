@@ -18,13 +18,13 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(express.json());
-// test api
-app.use("/",(req, res)=>{
-    res.status(200).json({
-        success: true,
-        message: "Backend Ready"
-     })
- });
+//test api
+// app.use("/",(req, res)=>{
+//     res.status(200).json({
+//         succes: true,
+//         message: "Backend Ready"
+//     })
+// });
 
 //routes
 //1.user

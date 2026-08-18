@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "Gitahi Dave",
+  "author": "SimiyuVic",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -18,13 +18,9 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "mongodb": "^7.5.0",
-    "mongoose": "^9.9.2",
+    "mongoose": "^9.7.4",
     "multer": "^2.2.0",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.14"
-  },
-  "keywords": [
-    "blog-servers"
-  ]
+  }
 }

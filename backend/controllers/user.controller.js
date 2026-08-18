@@ -2,237 +2,238 @@ import User from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// Cookie configuration helper for environment consistency
-const getCookieOptions = () => ({
-    httpOnly: true,
-    maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
-    path: "/"
-});
-
-// Register a new user and log them in immediately
-export const createUser = async (req, res) => {
-    try {
+//Controller to create a new user
+export const createUser = async(req, res)=>{
+    try
+    {
         const { userName, userEmail, userPassword, userRole } = req.body;
 
-        // Form validation
-        if (!userName || !userEmail || !userPassword) {
+        //form validation
+        if(!userName || !userEmail || !userPassword)
+        {
             return res.status(400).json({
                 success: false,
-                message: "All fields are required!"
+                message: "All Fields are Required!"
             });
         }
+        //check existing user
+        const existingUser = await User.findOne({$or : [{userName}, {userEmail}]});
 
-        // Check for existing user
-        const existingUser = await User.findOne({ $or: [{ userName }, { userEmail }] });
-        if (existingUser) {
+        if(existingUser)
+        {
             return res.status(409).json({
                 success: false,
-                message: "Username or Email already exists!"
+                message: "Username or Email already Exists!"
             });
         }
 
-        // Hash password
+        //hash the user password - encrypt
         const hashedPassword = await bcryptjs.hash(userPassword, 10);
 
-        // Save new user
+        //Register the user.
         const ourUser = new User({
             userName,
             userEmail,
             userPassword: hashedPassword,
-            userRole: userRole || "user"
+            userRole
         });
 
         await ourUser.save();
 
-        // Sign JWT Token
-        const token = jwt.sign(
-            {
-                id: ourUser._id,
-                userRole: ourUser.userRole
-            },
-            process.env.JWT_SECRET,
-            { expiresIn: "2d" }
-        );
-
-        // Set HttpOnly Cookie
-        res.cookie("myBlogCookie", token, getCookieOptions());
-
-        return res.status(201).json({
+        res.status(201).json({
             success: true,
-            message: `User ${userName} created successfully!`,
-            token,
-            user: {
-                id: ourUser._id,
-                userName: ourUser.userName,
-                userEmail: ourUser.userEmail,
-                userRole: ourUser.userRole
-            }
+            message: `User with Name ${userName} created!`
         });
 
-    } catch (error) {
-        console.error("Create User Error:", error);
+    }
+    catch(error)
+    {
+        console.log(error);
         return res.status(500).json({
             success: false,
-            message: "Something went wrong while registering!"
+            message: "Something Went wrong While registering!"
         });
     }
 };
 
-// Login an existing user
-export const loginUser = async (req, res) => {
-    try {
+//Controller to Login User
+export const loginUser = async(req, res)=>{
+    try
+    {
         const { userEmail, userPassword } = req.body;
 
-        // Form validation
-        if (!userEmail || !userPassword) {
+        //form validation
+        if(!userEmail || !userPassword)
+        {
             return res.status(400).json({
                 success: false,
-                message: "All fields are required!"
+                message: "All Fields are Required!"
             });
         }
 
-        // Find user with password selected
-        const existingUser = await User.findOne({ userEmail }).select("+userPassword");
-        if (!existingUser) {
+        //Check if user exists
+        const existingUser = await User.findOne({userEmail}).select("+userPassword");
+        if(!existingUser)
+        {
             return res.status(409).json({
                 success: false,
                 message: "Invalid Credentials!"
-            });
+            }); 
         }
 
-        // Compare password
+        //compare passwords
         const isMatch = await bcryptjs.compare(userPassword, existingUser.userPassword);
-        if (!isMatch) {
+        if(!isMatch)
+        {
             return res.status(409).json({
                 success: false,
                 message: "Invalid Credentials!"
             });
         }
 
-        // Role authorization check
-        if (existingUser.userRole !== "user") {
+        //check user roles
+        if(existingUser.userRole !== "user")
+        {
             return res.status(403).json({
                 success: false,
-                message: "Unauthorized Access!"
+                message: "Unauthorize Access!"
             });
         }
 
-        // Sign JWT Token
+
+
+        //set token
         const token = jwt.sign(
             {
                 id: existingUser._id,
                 userRole: existingUser.userRole
             },
             process.env.JWT_SECRET,
-            { expiresIn: "2d" }
+            {
+                expiresIn: "2d"
+            }
         );
 
-        // Set HttpOnly Cookie
-        res.cookie("myBlogCookie", token, getCookieOptions());
-
-        return res.status(200).json({
-            success: true,
-            message: "Welcome Back!",
-            token,
-            user: {
-                id: existingUser._id,
-                userName: existingUser.userName,
-                userEmail: existingUser.userEmail,
-                userRole: existingUser.userRole
-            }
+        //set cookie
+        res.cookie("myBlogCookie", token, {
+            httpOnly: true,
+            maxAge: 2 * 24 * 60 * 60 * 1000,
+            secure: true,
+            sameSite: "None",
+            path: "/"
         });
 
-    } catch (error) {
-        console.error("Login Error:", error);
+        //login the user
+        res.status(201).json({
+            success: true,
+            message: "Welcome Back",
+            token
+        });
+
+    }
+    catch(error)
+    {
+        console.log(error);
         return res.status(500).json({
             success: false,
-            message: "Something went wrong while logging in!"
+            message: "Something Went wrong While Loggin In!"
         });
     }
-};
+}
 
-// Check cookie existence AND verify JWT validity
-export const checkCookie = (req, res) => {
-    try {
+//check cookie existance to prove user is logged in:
+export const checkCookie = (req, res)=>{
+    try
+    {
         const token = req.cookies.myBlogCookie;
-        if (!token) {
-            return res.status(200).json({ message: false });
+        if(token)
+        {
+            return res.status(200).json({message: true});
         }
-
-        // Verify token expiry and secret signature
-        jwt.verify(token, process.env.JWT_SECRET);
-        return res.status(200).json({ message: true });
-
-    } catch (error) {
-        // Returns false if token is expired or tampered with
-        return res.status(200).json({ message: false });
+        return res.status(200).json({message: false});
     }
-};
-
-// Logout user and clear session cookie
-export const logoutUser = (req, res) => {
-    try {
-        const cookieOptions = getCookieOptions();
-        delete cookieOptions.maxAge; // Remove maxAge for clearCookie
-
-        res.clearCookie("myBlogCookie", cookieOptions);
-
-        return res.status(200).json({
-            success: true,
-            message: "Logged Out!"
-        });
-    } catch (error) {
-        console.error("Logout Error:", error);
+    catch(error)
+    {
+        console.log(error);
         return res.status(500).json({
             success: false,
-            message: "Something went wrong!"
+            message: "Something Went wrong While Loggin In!"
         });
     }
-};
+}
 
-// Fetch current user profile
-export const userProfile = (req, res) => {
-    try {
-        const { user } = req;
-        return res.status(200).json({
+//logout user
+export const logoutUser = (req, res)=>{
+    try
+    {
+        res.clearCookie("myBlogCookie", {
+            httpOnly: true,
+            maxAge: 0,
+            secure: true,
+            sameSite: "None",
+            path: "/"
+        });
+
+        res.status(200).json({
             success: true,
+            message: "Logged Out !"
+        });
+    }
+    catch(error)
+    {
+        return res.status(500).json({
+            success: false,
+            message: "Something Went wrong!"
+        });
+    }
+}
+
+//user profile
+export const userProfile = (req, res)=>{
+    try
+    {
+        const { user } = req;
+        //console.log("User Data",user);
+        res.status(200).json({
             data: user
         });
-    } catch (error) {
-        console.error("User Profile Error:", error);
+    }
+    catch(error)
+    {
         return res.status(500).json({
             success: false,
-            message: "Something went wrong!"
+            message: "Something Went wrong!"
         });
     }
-};
+}
 
-// Update user profile avatar
-export const changeAvatar = async (req, res) => {
-    try {
+//change profile
+export const changeAvatar = async(req, res) =>{
+    try
+    {
         const { user } = req;
-        if (!req.file) {
+        if(!req.file)
+        {
             return res.status(400).json({
-                success: false,
-                message: "No Avatar Selected!"
-            });
+            success: false,
+            message: "No Avatar Selected!"
+        })
         }
-
         user.avatar = req.file.path;
         await user.save();
 
         return res.status(200).json({
             success: true,
-            message: "Avatar Changed Successfully!",
-            avatar: user.avatar
-        });
-    } catch (error) {
-        console.error("Change Avatar Error:", error);
-        return res.status(500).json({
+            message: "Avatar Changed Successfully!"
+        })
+    }
+    catch(error)
+    {
+         return res.status(500).json({
             success: false,
-            message: "Something went wrong!"
+            message: "Something Went wrong!"
         });
     }
-};
+}
+
+
