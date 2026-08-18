@@ -11,6 +11,30 @@ const EditBlog = () => {
    const backendLink = useSelector((state)=>state.prod.link);
    const [loading, setLoading] = useState(false);
 
+   const handleDelete = async (blogId) => {
+        const confirmed = window.confirm("Are you sure you want to delete this blog?");
+        if (!confirmed) {
+            toast.info("Blog deletion cancelled");
+            return;
+        }
+
+        try {
+            const response = await axios.delete(`${backendLink}/api/blog/delete-blog/${blogId}`, {
+                withCredentials: true,
+            });
+
+            if (response.data.success) {
+                toast.success(response.data.message);
+                setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog._id !== blogId));
+            } else {
+                toast.error(response.data.message);
+            }
+        } catch (error) {
+            const message = error.response?.data?.message || error.message || "Unable to delete blog";
+            toast.error(message);
+        }
+   };
+
    useEffect(()=>{
     const fetchBlogs = async()=>{
         try
@@ -25,12 +49,12 @@ const EditBlog = () => {
         catch(error)
         {
             setLoading(false);
-            toast.error(error.response.data.message);
+            toast.error(error.response?.data?.message || "Failed to load blogs");
         }
 
     }
     fetchBlogs();
-   }, []);
+   }, [backendLink]);
 
     return (
         <div className="container my-5">
@@ -42,7 +66,7 @@ const EditBlog = () => {
                 Manage Blogs
             </h2>
             {loading && <h4 className="text-success">Loading Blogs . . .</h4>}
-            <BlogTable blogs={blogs} />
+            <BlogTable blogs={blogs} onDelete={handleDelete} />
 
         </div>
     );

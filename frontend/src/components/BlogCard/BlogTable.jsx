@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const BlogTable = ({ blogs = [] }) => {
+const BlogTable = ({ blogs = [], onDelete }) => {
     return (
         <div className="table-responsive">
             <table className="table table-hover">
@@ -32,7 +32,9 @@ const BlogTable = ({ blogs = [] }) => {
                                             Edit
                                         </Link>
 
-                                        <button className="btn btn-danger btn-sm">
+                                        <button className="btn btn-danger btn-sm" 
+                                        onClick={()=>onDelete(blog._id)}
+                                        >
                                             Delete
                                         </button>
                                     </td>
